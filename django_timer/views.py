@@ -1,27 +1,45 @@
 
-from django.http.response import HttpResponse
+from django.views.generic import View
+from django.shortcuts import redirect
 
 from django_timer.models import Timer
 
-def start_timer(request):
-    if request.user.is_authenticated:
-        user = request.user
-    else:
-        user = None
-    Timer.objects.start(user=user)
-    return HttpResponse()
+class TimerView(View):
+    
+    def get_success_url(self):
+        return '/'
+    
+    def post(self, request):
+        self.action(request)
+        return redirect(self.get_success_url())
 
-def pause_timer(request):
-    timer = Timer.objects.last()
-    timer.pause()
-    return HttpResponse()
+    def get_user(self, request):
+        if request.user.is_authenticated:
+            return request.user
 
-def resume_timer(request):
-    timer = Timer.objects.last()
-    timer.resume()
-    return HttpResponse()
+    def action(self, request):
+        raise NotImplementedError('{} has to define an action method.'.format(self.__class__))
 
-def stop_timer(request):
-    timer = Timer.objects.last()
-    timer.stop()
-    return HttpResponse()
+class Start(TimerView):
+
+    def action(self, request):
+        user = self.get_user(request)
+        Timer.objects.get_or_start(user=user)
+    
+class Pause(TimerView):
+
+    def action(self, request):
+        user = self.get_user(request)
+        Timer.objects.get_for_user(user).pause()
+
+class Resume(TimerView):
+
+    def action(self, request):
+        user = self.get_user(request)
+        Timer.objects.get_for_user(user).resume()
+
+class Stop(TimerView):
+
+    def action(self, request):
+        user = self.get_user(request)
+        Timer.objects.get_for_user(user).stop()

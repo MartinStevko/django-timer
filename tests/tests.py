@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.template import Template, Context
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseNotAllowed
 from django.contrib.auth.models import User
 
 from django_timer.models import Timer, Segment, TimerException
@@ -127,14 +127,14 @@ class ModelTest(TestCase):
 class ViewTest(TestCase):
 
     def test_start_and_stop_timer(self):
-        response = self.client.post(reverse('start_timer'))
+        self.client.post(reverse('start_timer'))
         self.assertEqual(Timer.objects.count(), 1)
-        response = self.client.post(reverse('pause_timer'))
+        self.client.post(reverse('pause_timer'))
         self.assertIsInstance(Timer.objects.first().segment_set.last().stop_time, datetime)
-        response = self.client.post(reverse('resume_timer'))
+        self.client.post(reverse('resume_timer'))
         self.assertEqual(Timer.objects.first().segment_set.count(), 2)
         self.assertIsNone(Timer.objects.first().segment_set.last().stop_time)
-        response = self.client.post(reverse('stop_timer'))
+        self.client.post(reverse('stop_timer'))
         self.assertTrue(Timer.objects.first().stopped) 
 
     def test_start_timer_as_user(self):
@@ -144,6 +144,20 @@ class ViewTest(TestCase):
         timer = Timer.objects.first()
         self.assertEqual(timer.user, user)
 
+    def test_method_not_allowed(self):
+
+        response = self.client.get(reverse('start_timer'))
+        self.assertEqual(response.status_code, 405)
+        
+        response = self.client.get(reverse('pause_timer'))
+        self.assertEqual(response.status_code, 405)
+        
+        response = self.client.get(reverse('resume_timer'))
+        self.assertEqual(response.status_code, 405)
+        
+        response = self.client.get(reverse('stop_timer'))
+        self.assertEqual(response.status_code, 405)
+        
 class TemplateTagsTest(TestCase):
 
     def test_render_timer(self):
