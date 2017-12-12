@@ -13,7 +13,7 @@ class TimerQuerySet(models.QuerySet):
 
     def get_or_start(self, user=None):
         try:
-            return self.get(stopped=False)
+            return self.get(stopped=False, user=user)
         except Timer.DoesNotExist:
             return self.start(user=user)
 

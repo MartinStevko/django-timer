@@ -5,6 +5,7 @@ from time import sleep
 from django.test import TestCase
 from django.urls import reverse
 from django.template import Template, Context
+from django.http import HttpResponseBadRequest
 from django.contrib.auth.models import User
 
 from django_timer.models import Timer, Segment, TimerException
@@ -75,6 +76,23 @@ class ModelTest(TestCase):
         t2 = Timer.objects.get_or_start()
         self.assertEqual(Timer.objects.count(), 1)
         self.assertEqual(t1.pk, t2.pk)
+        t2.stop()
+        t3 = Timer.objects.get_or_start()
+        self.assertEqual(Timer.objects.count(), 2)
+        self.assertNotEqual(t2.pk, t3.pk)
+        user = User.objects.create_user(username='foo', password='bar')
+        t4 = Timer.objects.get_or_start(user=user)
+        self.assertEqual(Timer.objects.count(), 3)
+        
+    def test_get_for_user(self):
+        u1 = User.objects.create_user(username='foo', password='bar')
+        u2 = User.objects.create_user(username='bar', password='foo')
+        t1 = Timer.objects.get_or_start(user=u1)
+        t1.stop()
+        t1a = Timer.objects.get_or_start(user=u1)
+        t2 = Timer.objects.get_or_start(user=u2)
+        t0 = Timer.objects.get_or_start(user=None)
+        self.assertEqual(Timer.objects.count(), 4)
 
 class ViewTest(TestCase):
 
@@ -87,7 +105,7 @@ class ViewTest(TestCase):
         self.assertEqual(Timer.objects.first().segment_set.count(), 2)
         self.assertIsNone(Timer.objects.first().segment_set.last().stop_time)
         response = self.client.post(reverse('stop_timer'))
-        self.assertTrue(Timer.objects.first().stopped)     
+        self.assertTrue(Timer.objects.first().stopped) 
 
     def test_start_timer_as_user(self):
         user = User.objects.create_user(username='foo', password='bar')
