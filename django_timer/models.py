@@ -4,19 +4,21 @@ from datetime import timedelta
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
+from django.contrib.auth.models import User
 
 class TimerException(Exception):
     pass
 
 class TimerQuerySet(models.QuerySet):
 
-    def start_timer(self):
-        timer = self.create()
+    def start(self, user=None):
+        timer = self.create(user=user)
         timer.segment_set.create()
         return timer
 
 class Timer(models.Model):
 
+    user = models.ForeignKey(to=User, null=True)
     stopped = models.BooleanField(default=False)
 
     objects = TimerQuerySet.as_manager()

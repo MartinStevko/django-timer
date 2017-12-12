@@ -4,7 +4,11 @@ from django.http.response import HttpResponse
 from django_timer.models import Timer
 
 def start_timer(request):
-    Timer.objects.start_timer()
+    if request.user.is_authenticated:
+        user = request.user
+    else:
+        user = None
+    Timer.objects.start(user=user)
     return HttpResponse()
 
 def pause_timer(request):
