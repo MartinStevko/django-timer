@@ -103,6 +103,5 @@ class TemplateTagsTest(TestCase):
         template = Template('{% load timer %}{% render_timer timer %}')
         context = Context({'timer': timer})
         html = template.render(context)
-        self.assertIn('<script>', html)
-        self.assertIn('var duration = ', html)
+        self.assertIn('id="django-timer"', html)
         
