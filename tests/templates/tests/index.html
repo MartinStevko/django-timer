@@ -1,35 +1,8 @@
+{% load timer %}
 <!doctype html>
 <html>
     <body>
-        <p>
-            Counter: <span id="timer"></span>
-        </p>
-
-        <script>
-            var duration = {{ timer.duration.total_seconds }}
-
-            function pad(number){
-                return ('00' + number).slice(-2)
-            }
-
-            function printDuration(duration){
-                var seconds = Math.floor(duration)
-                var minutes = Math.floor(seconds/60)
-                var hours = Math.floor(minutes/60)
-                seconds = seconds % 60
-                minutes = minutes % 60
-                if (hours) {
-                    return hours + ':' + pad(minutes) + ':' + pad(seconds)
-                }
-                return pad(minutes) + ':' + pad(seconds)
-            }
-
-            setInterval(function() {
-                duration++
-                timer.innerHTML = printDuration(duration)
-            }, 1000)
-
-        </script>
+        {% render_timer timer %}
 
         <p>
             static duration: {{ timer.duration }}; started: {{ timer.segment_set.first.start_time }}

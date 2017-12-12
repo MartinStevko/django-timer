@@ -4,6 +4,7 @@ from time import sleep
 
 from django.test import TestCase
 from django.urls import reverse
+from django.template import Template, Context
 from django.contrib.auth.models import User
 
 from django_timer.models import Timer, Segment, TimerException
@@ -94,4 +95,14 @@ class ViewTest(TestCase):
         self.client.post(reverse('start_timer'))
         timer = Timer.objects.first()
         self.assertEqual(timer.user, user)
+
+class TemplateTagsTest(TestCase):
+
+    def test_render_timer(self):
+        timer = Timer.objects.start()
+        template = Template('{% load timer %}{% render_timer timer %}')
+        context = Context({'timer': timer})
+        html = template.render(context)
+        self.assertIn('<script>', html)
+        self.assertIn('var duration = ', html)
         
