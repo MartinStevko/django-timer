@@ -1,5 +1,6 @@
 
 from datetime import timedelta, datetime
+from time import sleep
 
 from django.test import TestCase
 from django.urls import reverse
@@ -43,6 +44,15 @@ class ModelTest(TestCase):
         timer.stop()
         timer.resume()
         self.assertEqual(timer.segment_set.count(), 3)
+
+    def test_with_time(self):
+        timer = Timer.objects.start_timer()
+        sleep(0.1)
+        timer.pause()
+        timer.resume()
+        sleep(0.1)
+        timer.stop()
+        self.assertAlmostEqual(timer.duration().total_seconds(), 0.2, delta=0.05)
 
 class ViewTest(TestCase):
 
