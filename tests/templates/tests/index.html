@@ -1,41 +1,39 @@
-<p>
-    {{ timer }}; static duration: {{ timer.duration }}
-</p>
+<!doctype html>
+<html>
+    <body>
+        <p>
+            Counter: <span id="timer"></span>
+        </p>
 
-<p>
-    Counter: <span id="timer"></span>
-</p>
-<script>
-    function timer(){
-        var initial = {{ timer.duration.total_seconds }} * 1000
-        var start = new Date(Date.now() - initial)
+        <script>
+            var duration = {{ timer.duration.total_seconds }}
 
-        var timer = document.getElementById('timer')
-
-        function pad(number){
-            return ('00' + number).slice(-2)
-        }
-
-        function printDuration(milliseconds){
-            var seconds = Math.floor(milliseconds/1000)
-            var minutes = Math.floor(seconds/60)
-            var hours = Math.floor(minutes/60)
-            seconds = seconds % 60
-            minutes = minutes % 60
-            if (hours) {
-                return hours + ':' + pad(minutes) + ':' + pad(seconds)
+            function pad(number){
+                return ('00' + number).slice(-2)
             }
-            return pad(minutes) + ':' + pad(seconds)
-        }
 
-        function show(){
+            function printDuration(duration){
+                var seconds = Math.floor(duration)
+                var minutes = Math.floor(seconds/60)
+                var hours = Math.floor(minutes/60)
+                seconds = seconds % 60
+                minutes = minutes % 60
+                if (hours) {
+                    return hours + ':' + pad(minutes) + ':' + pad(seconds)
+                }
+                return pad(minutes) + ':' + pad(seconds)
+            }
+
             setInterval(function() {
-                var now = new Date()
-                timer.innerHTML = printDuration(now - start)
+                duration++
+                timer.innerHTML = printDuration(duration)
             }, 1000)
-        }
 
-        return show()
-    }
-    timer()
-</script>
+        </script>
+
+        <p>
+            {{ timer }}; static duration: {{ timer.duration }}
+        </p>
+            
+        </body>
+</html>
