@@ -1,5 +1,8 @@
 function pad(number){
-    return ('00' + number).slice(-2)
+    if (number < 10){
+        number = '0' + number
+    }
+    return number
 }
 
 function printDuration(duration){
@@ -18,7 +21,7 @@ var timer = document.getElementById('django-timer')
 
 if (timer) {
     var duration = timer.getAttribute('value')
-    if (duration){
+    if ( duration && timer.classList.contains('active') ){
         setInterval(function() {
             duration++
             timer.innerHTML = printDuration(duration)
