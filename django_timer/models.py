@@ -50,6 +50,14 @@ class Timer(models.Model):
             raise TimerException(_('Cannot resume, if timer is still running.'))
         self.segment_set.create()
 
+    @property
+    def running(self):
+        return not self.stopped and not self.paused
+
+    @property
+    def paused(self):
+        return not self.stopped and self.segment_set.last().stop_time
+
 class Segment(models.Model):
 
     timer = models.ForeignKey(to=Timer)

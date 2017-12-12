@@ -103,6 +103,27 @@ class ModelTest(TestCase):
         with self.assertRaises(ObjectDoesNotExist):
             Timer.objects.get_for_user(user=u2)
 
+    def test_status_flags(self):
+        t = Timer.objects.start()
+        self.assertTrue(t.running)
+        self.assertFalse(t.paused)
+        self.assertFalse(t.stopped)
+
+        t.pause()
+        self.assertFalse(t.running)
+        self.assertTrue(t.paused)
+        self.assertFalse(t.stopped)
+
+        t.resume()
+        self.assertTrue(t.running)
+        self.assertFalse(t.paused)
+        self.assertFalse(t.stopped)
+
+        t.stop()
+        self.assertFalse(t.running)
+        self.assertFalse(t.paused)
+        self.assertTrue(t.stopped)
+
 class ViewTest(TestCase):
 
     def test_start_and_stop_timer(self):
