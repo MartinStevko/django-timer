@@ -1,37 +1,8 @@
 <p>
-    <span id="timer"></span>
+    <span id="django-timer" value="{{ timer.duration.total_seconds }}"></span>
 </p>
-<form method="POST">
-    <button formaction="{% url 'pause_timer' %}">Pause</button>
-    <button formaction="{% url 'resume_timer' %}">Resume</button>
-    <button formaction="{% url 'stop_timer' %}">Stop</button>
-</form>
+
 <p>
-    Timer has {{ timer.segment_set.count }} segments.
+    Timer was started on {{ timer.segment_set.first.start_time }} and has {{ timer.segment_set.count }} segments.
+    Timer has run for {{ timer.duration }}
 </p>
-
-<script>
-    var duration = {{ timer.duration.total_seconds }}
-
-    function pad(number){
-        return ('00' + number).slice(-2)
-    }
-
-    function printDuration(duration){
-        var seconds = Math.floor(duration)
-        var minutes = Math.floor(seconds/60)
-        var hours = Math.floor(minutes/60)
-        seconds = seconds % 60
-        minutes = minutes % 60
-        if (hours) {
-            return hours + ':' + pad(minutes) + ':' + pad(seconds)
-        }
-        return pad(minutes) + ':' + pad(seconds)
-    }
-
-    setInterval(function() {
-        duration++
-        timer.innerHTML = printDuration(duration)
-    }, 1000)
-
-</script>

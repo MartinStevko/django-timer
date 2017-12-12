@@ -10,6 +10,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = 'secret'
 
 INSTALLED_APPS = [
+    'django.contrib.staticfiles',
     'django.contrib.sessions',
     'django.contrib.contenttypes',
     'django.contrib.auth',
@@ -37,5 +38,7 @@ TEMPLATES = [
         'APP_DIRS': True,
     }
 ]
+
+STATIC_URL = '/static/'
 
 DEBUG = True

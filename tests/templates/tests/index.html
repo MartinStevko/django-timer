@@ -1,12 +1,8 @@
-{% load timer %}
+{% load timer static %}
 <!doctype html>
 <html>
     <body>
         {% render_timer timer %}
-
-        <p>
-            static duration: {{ timer.duration }}; started: {{ timer.segment_set.first.start_time }}
-        </p>
-            
-        </body>
+        <script src="{% static 'django_timer/js/timer.js' %}"></script>
+    </body>
 </html>
