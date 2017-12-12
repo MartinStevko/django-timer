@@ -4,6 +4,9 @@ from datetime import timedelta
 from django.db import models
 from django.utils.timezone import now
 
+class TimerException(Exception):
+    pass
+
 class TimerQuerySet(models.QuerySet):
 
     def start_timer(self):
@@ -38,6 +41,8 @@ class Segment(models.Model):
     stop_time = models.DateTimeField(null=True)
 
     def duration(self):
+        if not self.stop_time:
+            raise TimerException('Timer is still running.')
         return self.stop_time - self.start_time
 
     def stop(self):

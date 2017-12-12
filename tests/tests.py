@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 from django.test import TestCase
 from django.urls import reverse
 
-from django_timer.models import Timer, Segment
+from django_timer.models import Timer, Segment, TimerException
 
 class ModelTest(TestCase):
 
@@ -12,6 +12,11 @@ class ModelTest(TestCase):
         timer = Timer.objects.start_timer()
         self.assertEqual(timer.segment_set.count(), 1)
         self.assertIsInstance(timer.segment_set.first().start_time, datetime)
+
+    def test_duration_raises_custom_error_if_timer_still_running(self):
+        timer = Timer.objects.start_timer()
+        with self.assertRaises(TimerException):
+            timer.duration()        
 
     def test_stop_timer(self):
         timer = Timer.objects.start_timer()
