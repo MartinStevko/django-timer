@@ -30,8 +30,14 @@ class ModelTest(TestCase):
         timer = Timer.objects.start_timer()
         timer.pause()
         timer.resume()
+        # Timer cannot be resumed a second time, if it's still running
+        with self.assertRaises(Exception):
+            timer.resume()
         self.assertEqual(timer.segment_set.count(), 2)
         self.assertIsNone(timer.segment_set.last().stop_time)
+        timer.stop()
+        timer.resume()
+        self.assertEqual(timer.segment_set.count(), 3)
 
 class ViewTest(TestCase):
 

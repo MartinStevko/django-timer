@@ -26,6 +26,8 @@ class Timer(models.Model):
         return self.stop()
 
     def resume(self):
+        if not self.segment_set.last().stop_time:
+            raise Exception()
         self.segment_set.create()
 
 class Segment(models.Model):
