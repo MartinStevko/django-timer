@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from time import sleep
 
 from django.test import TestCase
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.template import Template, Context
 from django.http import HttpResponseBadRequest
@@ -97,6 +98,10 @@ class ModelTest(TestCase):
         self.assertEqual(Timer.objects.get_for_user(), t0)
         self.assertEqual(Timer.objects.get_for_user(user=u1), t1a)
         self.assertEqual(Timer.objects.get_for_user(user=u2), t2)
+
+        t2.stop()
+        with self.assertRaises(ObjectDoesNotExist):
+            Timer.objects.get_for_user(user=u2)
 
 class ViewTest(TestCase):
 
