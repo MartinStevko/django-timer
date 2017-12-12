@@ -1,13 +1,13 @@
 
 from django.http.response import HttpResponse
 
-from django_timer.models import Entry
+from django_timer.models import Timer
 
 def start_timer(request):
-    Entry.objects.create()
+    Timer.objects.start_timer()
     return HttpResponse()
 
 def stop_timer(request):
-    entry = Entry.objects.last()
-    entry.stop()
+    timer = Timer.objects.last()
+    timer.stop()
     return HttpResponse()
