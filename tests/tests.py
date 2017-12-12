@@ -14,10 +14,12 @@ class ModelTest(TestCase):
         self.assertEqual(timer.segment_set.count(), 1)
         self.assertIsInstance(timer.segment_set.first().start_time, datetime)
 
-    def test_duration_raises_custom_error_if_timer_still_running(self):
+    def test_duration_if_timer_still_running(self):
         timer = Timer.objects.start_timer()
-        with self.assertRaises(TimerException):
-            timer.duration()        
+        d1 = timer.duration()
+        sleep(0.01)
+        d2 = timer.duration()
+        self.assertTrue(d2>d1)
 
     def test_stop_timer(self):
         timer = Timer.objects.start_timer()
@@ -41,9 +43,15 @@ class ModelTest(TestCase):
             timer.resume()
         self.assertEqual(timer.segment_set.count(), 2)
         self.assertIsNone(timer.segment_set.last().stop_time)
-        timer.stop()
+        timer.pause()
         timer.resume()
         self.assertEqual(timer.segment_set.count(), 3)
+
+    def test_timer_stopped(self):
+        timer = Timer.objects.start_timer()
+        timer.stop()
+        with self.assertRaises(TimerException):
+            timer.resume()
 
     def test_with_time(self):
         timer = Timer.objects.start_timer()
@@ -59,6 +67,11 @@ class ViewTest(TestCase):
     def test_start_and_stop_timer(self):
         response = self.client.post(reverse('start_timer'))
         self.assertEqual(Timer.objects.count(), 1)
+        response = self.client.post(reverse('pause_timer'))
+        self.assertIsInstance(Timer.objects.first().segment_set.last().stop_time, datetime)
+        response = self.client.post(reverse('resume_timer'))
+        self.assertEqual(Timer.objects.first().segment_set.count(), 2)
+        self.assertIsNone(Timer.objects.first().segment_set.last().stop_time)
         response = self.client.post(reverse('stop_timer'))
-        timer = Timer.objects.first()
-        self.assertIsInstance(timer.duration(), timedelta)
+        self.assertTrue(Timer.objects.first().stopped)        
+        

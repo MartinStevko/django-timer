@@ -17,18 +17,24 @@ class TimerQuerySet(models.QuerySet):
 
 class Timer(models.Model):
 
+    stopped = models.BooleanField(default=False)
+
     objects = TimerQuerySet.as_manager()
 
     def duration(self):
         return sum([segment.duration() for segment in self.segment_set.all()], timedelta())
 
     def stop(self):
-        self.segment_set.last().stop()
+        self.pause()
+        self.stopped = True
+        self.save()
 
     def pause(self):
-        return self.stop()
+        self.segment_set.last().stop()
 
     def resume(self):
+        if self.stopped:
+            raise TimerException(_('Timer has been stopped and cannot be resumed.'))
         if not self.segment_set.last().stop_time:
             raise TimerException(_('Cannot resume, if timer is still running.'))
         self.segment_set.create()
@@ -42,7 +48,7 @@ class Segment(models.Model):
 
     def duration(self):
         if not self.stop_time:
-            raise TimerException(_('Cannot calculate duration, if timer is still running.'))
+            return now() - self.start_time
         return self.stop_time - self.start_time
 
     def stop(self):
