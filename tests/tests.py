@@ -68,6 +68,13 @@ class ModelTest(TestCase):
         timer = Timer.objects.start(user=user)
         self.assertEqual(timer.user, user)
 
+    def test_get_or_start(self):
+        t1 = Timer.objects.get_or_start()
+        self.assertEqual(Timer.objects.count(), 1)
+        t2 = Timer.objects.get_or_start()
+        self.assertEqual(Timer.objects.count(), 1)
+        self.assertEqual(t1.pk, t2.pk)
+
 class ViewTest(TestCase):
 
     def test_start_and_stop_timer(self):

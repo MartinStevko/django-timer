@@ -11,6 +11,12 @@ class TimerException(Exception):
 
 class TimerQuerySet(models.QuerySet):
 
+    def get_or_start(self, user=None):
+        try:
+            return self.get(stopped=False)
+        except Timer.DoesNotExist:
+            return self.start(user=user)
+
     def start(self, user=None):
         timer = self.create(user=user)
         timer.segment_set.create()
