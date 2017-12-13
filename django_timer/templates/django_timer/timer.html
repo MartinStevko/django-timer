@@ -1,8 +1,31 @@
-<p>
-    <span id="django-timer" value="{{ timer.duration.total_seconds }}"></span>
-</p>
+{% load timer %}
+<div class="django-timer">
+    <form action="" method="POST">
+        {% csrf_token %}
+        {% if timer %}
+        <p>
+            <span id="django-timer" 
+                {% if timer.running %}class="active"{% endif %} 
+                value="{{ timer.duration.total_seconds }}">
+                {{ timer.duration.total_seconds | hhmmss }}
+            </span>
+            {% if timer.running %}
+            <button type="submit" formaction="{% url 'pause_timer' %}">Pause</button>
+            {% elif timer.paused %}
+            <button type="submit" formaction="{% url 'resume_timer' %}">Resume</button>
+            {% endif %}
+            <button type="submit" formaction="{% url 'stop_timer' %}">Stop</button>
+        </p>
 
-<p>
-    Timer was started on {{ timer.segment_set.first.start_time }} and has {{ timer.segment_set.count }} segments.
-    Timer has run for {{ timer.duration }}
-</p>
+        <p>
+            Timer was started on {{ timer.segment_set.first.start_time }} 
+            and has {{ timer.segment_set.count }} segments.
+            When this page was loaded, Timer had run for {{ timer.duration }}. 
+        </p>
+        {% else %}
+        <p>
+            <button type="submit" formaction="{% url 'start_timer' %}">Start</button>
+        </p>
+        {% endif %}
+    </form>
+</div>
