@@ -3,6 +3,14 @@
 <html>
     <body>
         {% render_timer timer %}
+        <div>
+            <h1>Previous timers</h1>
+            <ul>
+                {% for timer in object_list %}
+                <li>{{ timer.duration.total_seconds | hhmmss }}</li>
+                {% endfor %}
+            </ul>
+        </div>
         <script src="{% static 'django_timer/js/timer.js' %}"></script>
     </body>
 </html>
