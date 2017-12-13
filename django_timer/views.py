@@ -30,7 +30,10 @@ class Pause(TimerView):
 
     def action(self, request):
         user = self.get_user(request)
-        Timer.objects.get_for_user(user).pause()
+        try:
+            Timer.objects.get_for_user(user).pause()
+        except Timer.DoesNotExist:
+            pass
             
 class Resume(TimerView):
 
@@ -38,11 +41,14 @@ class Resume(TimerView):
         user = self.get_user(request)
         try:
             Timer.objects.get_for_user(user).resume()
-        except TimerResumeException:
+        except (TimerResumeException, Timer.DoesNotExist):
             pass
         
 class Stop(TimerView):
 
     def action(self, request):
         user = self.get_user(request)
-        Timer.objects.get_for_user(user).stop()
+        try:
+            Timer.objects.get_for_user(user).stop()
+        except Timer.DoesNotExist:
+            pass

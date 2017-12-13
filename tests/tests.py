@@ -158,14 +158,33 @@ class ViewTest(TestCase):
         response = self.client.get(reverse('stop_timer'))
         self.assertEqual(response.status_code, 405)
 
-    def test_race_conditions(self):
+    def test_pause_and_resume_race_conditions(self):
 
         self.client.post(reverse('start_timer'))
         self.client.post(reverse('pause_timer'))
 
         self.client.post(reverse('resume_timer'))
-        # Resuming a second time, shouldn't raise
+        # Resuming a second time shouldn't raise
         self.client.post(reverse('resume_timer'))
+
+        self.client.post(reverse('stop_timer'))
+        # Resuming or pausing a stopped timer shouldn't raise
+        self.client.post(reverse('pause_timer'))
+        self.client.post(reverse('resume_timer'))
+
+    def test_start_if_timer_running(self):
+
+        self.client.post(reverse('start_timer'))
+        self.client.post(reverse('start_timer'))
+
+        self.assertEqual(Timer.objects.count(), 1) 
+
+    def test_stop_if_no_timer_is_running(self):
+
+        self.client.post(reverse('start_timer'))
+        self.client.post(reverse('stop_timer'))
+        # Stopping a second time shouldn't raise
+        self.client.post(reverse('stop_timer'))
 
 class TemplateTagsTest(TestCase):
 
