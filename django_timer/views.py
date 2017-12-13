@@ -2,7 +2,7 @@
 from django.views.generic import View
 from django.shortcuts import redirect
 
-from django_timer.models import Timer
+from django_timer.models import Timer, TimerResumeException
 
 class TimerView(View):
     
@@ -31,13 +31,16 @@ class Pause(TimerView):
     def action(self, request):
         user = self.get_user(request)
         Timer.objects.get_for_user(user).pause()
-
+            
 class Resume(TimerView):
 
     def action(self, request):
         user = self.get_user(request)
-        Timer.objects.get_for_user(user).resume()
-
+        try:
+            Timer.objects.get_for_user(user).resume()
+        except TimerResumeException:
+            pass
+        
 class Stop(TimerView):
 
     def action(self, request):

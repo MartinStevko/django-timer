@@ -9,6 +9,9 @@ from django.contrib.auth.models import User
 class TimerException(Exception):
     pass
 
+class TimerResumeException(TimerException):
+    pass
+
 class TimerQuerySet(models.QuerySet):
 
     def get_or_start(self, user=None):
@@ -45,9 +48,9 @@ class Timer(models.Model):
 
     def resume(self):
         if self.stopped:
-            raise TimerException(_('Timer has been stopped and cannot be resumed.'))
+            raise TimerResumeException(_('Timer has been stopped and cannot be resumed.'))
         if not self.segment_set.last().stop_time:
-            raise TimerException(_('Cannot resume, if timer is still running.'))
+            raise TimerResumeException(_('Cannot resume, if timer is still running.'))
         self.segment_set.create()
 
     @property

@@ -9,7 +9,7 @@ from django.template import Template, Context
 from django.http import HttpResponseNotAllowed
 from django.contrib.auth.models import User
 
-from django_timer.models import Timer, Segment, TimerException
+from django_timer.models import Timer, Segment, TimerException, TimerResumeException
 
 class ModelTest(TestCase):
 
@@ -43,7 +43,7 @@ class ModelTest(TestCase):
         timer.pause()
         timer.resume()
         # Timer cannot be resumed a second time, if it's still running
-        with self.assertRaises(Exception):
+        with self.assertRaises(TimerResumeException):
             timer.resume()
         self.assertEqual(timer.segment_set.count(), 2)
         self.assertIsNone(timer.segment_set.last().stop_time)
@@ -54,7 +54,7 @@ class ModelTest(TestCase):
     def test_timer_stopped(self):
         timer = Timer.objects.start()
         timer.stop()
-        with self.assertRaises(TimerException):
+        with self.assertRaises(TimerResumeException):
             timer.resume()
 
     def test_with_time(self):
@@ -100,7 +100,7 @@ class ModelTest(TestCase):
         self.assertEqual(Timer.objects.get_for_user(user=u2), t2)
 
         t2.stop()
-        with self.assertRaises(ObjectDoesNotExist):
+        with self.assertRaises(Timer.DoesNotExist):
             Timer.objects.get_for_user(user=u2)
 
     def test_status_flags(self):
@@ -148,16 +148,25 @@ class ViewTest(TestCase):
 
         response = self.client.get(reverse('start_timer'))
         self.assertEqual(response.status_code, 405)
-        
+
         response = self.client.get(reverse('pause_timer'))
         self.assertEqual(response.status_code, 405)
-        
+
         response = self.client.get(reverse('resume_timer'))
         self.assertEqual(response.status_code, 405)
-        
+
         response = self.client.get(reverse('stop_timer'))
         self.assertEqual(response.status_code, 405)
-        
+
+    def test_race_conditions(self):
+
+        self.client.post(reverse('start_timer'))
+        self.client.post(reverse('pause_timer'))
+
+        self.client.post(reverse('resume_timer'))
+        # Resuming a second time, shouldn't raise
+        self.client.post(reverse('resume_timer'))
+
 class TemplateTagsTest(TestCase):
 
     def test_render_timer(self):
