@@ -7,10 +7,10 @@ from django_timer.models import Timer
 def index(request):
     user = request.user if request.user.is_authenticated else None
     try:
-        timer = Timer.objects.get_for_user(user=user)
+        timer = Timer.objects.filter(user=user).last()
     except Timer.DoesNotExist:
         timer = None
-    return render(request, 'tests/index.html', {'timer': timer, 'object_list': Timer.objects.filter(user=user, stopped=True)})
+    return render(request, 'tests/index.html', {'timer': timer})
 
 urlpatterns = [
     url(r'^$', index, name='index'),

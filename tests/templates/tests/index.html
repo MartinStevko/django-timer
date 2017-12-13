@@ -1,16 +1,19 @@
 {% load timer static %}
 <!doctype html>
 <html>
+    <head>
+        <link rel="stylesheet" href="{% static 'django_timer/css/timer.css' %}">
+        <style>
+            main {
+                width: 400px;
+                margin: auto;
+            }
+        </style>
+    </head>
     <body>
-        {% render_timer timer %}
-        <div>
-            <h1>Previous timers</h1>
-            <ul>
-                {% for timer in object_list %}
-                <li>{{ timer.duration.total_seconds | hhmmss }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+        <main>
+            {% render_timer timer %}
+        </main>
         <script src="{% static 'django_timer/js/timer.js' %}"></script>
     </body>
 </html>

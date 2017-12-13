@@ -3,35 +3,45 @@
     <form action="" method="POST">
         {% csrf_token %}
         {% if timer %}
-        <p>
-            <span id="django-timer" 
-                {% if timer.running %}class="active"{% endif %} 
-                value="{{ timer.duration.total_seconds }}">
-                {{ timer.duration.total_seconds | hhmmss }}
-            </span>
+        <ul class="django-timer-segments">
+            {% for segment in timer.segment_set.all %}
+                {% if segment.stop_time %}
+                <li class="inactive">{{ segment.duration.total_seconds | hhmmss }}</li>
+                {% else %}
+                <li id="django-timer"
+                    value="{{ segment.duration.total_seconds }}"
+                    {% if timer.running %}class="active"{% endif %} 
+                >
+                    {{ segment.duration.total_seconds | hhmmss }}
+                </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    
+        <p class="django-timer-main">
             {% if timer.running %}
             <button type="submit" formaction="{% url 'pause_timer' %}">Pause</button>
             {% elif timer.paused %}
             <button type="submit" formaction="{% url 'resume_timer' %}">Resume</button>
             {% endif %}
+            {% if timer.stopped %}
+            <button type="submit" formaction="{% url 'start_timer' %}">Start a new timer</button>
+            {% else %}
             <button type="submit" formaction="{% url 'stop_timer' %}">Stop</button>
+            {% endif %}
         </p>
 
-        <p>
-            Timer was started on {{ timer.segment_set.first.start_time }}. 
+        <p class="django-timer-info">
+            Timer was started on {{ timer.segment_set.first.start_time }}
+        </p>
+
+        <p class="django-timer-info">
             When this page was loaded, Timer had run for {{ timer.duration.total_seconds | hhmmss }}. 
         </p>
 
-        <ul>
-            {% for segment in timer.segment_set.all %}
-            {% if segment.stop_time %}
-            <li>{{ segment.duration.total_seconds | hhmmss }}</li>
-            {% endif %}
-            {% endfor %}
-        </ul>
         {% else %}
-        <p>
-            <button type="submit" formaction="{% url 'start_timer' %}">Start</button>
+        <p class="django-timer-main">
+            <button type="submit" formaction="{% url 'start_timer' %}">Start a new timer</button>
         </p>
         {% endif %}
     </form>

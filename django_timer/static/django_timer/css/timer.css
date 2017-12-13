@@ -1,0 +1,56 @@
+.django-timer * {
+    box-sizing: border-box;
+}
+
+/* Main */
+
+.django-timer-main {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: baseline;
+}
+
+.django-timer-main > * {
+    margin-right: 6px;
+}
+
+/* Buttons */
+
+.django-timer button {
+    border: unset;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: #337ab4;
+    color: #fff;
+    border-radius: 4px;
+}
+
+/* Timer counter */
+
+span#django-timer {
+    padding: 6px 12px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Segments */
+
+.django-timer-segments {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    list-style: none;
+    padding: 0;
+}
+
+.django-timer-segments .inactive {
+    color: #555;
+}
+
+.django-timer-segments li {
+    padding: 6px 12px;
+}
+
+.django-timer-segments li:not(:last-child) {
+    border-bottom: 1px solid #ccc;
+}
