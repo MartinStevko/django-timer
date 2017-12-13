@@ -18,10 +18,17 @@
         </p>
 
         <p>
-            Timer was started on {{ timer.segment_set.first.start_time }} 
-            and has {{ timer.segment_set.count }} segments.
-            When this page was loaded, Timer had run for {{ timer.duration }}. 
+            Timer was started on {{ timer.segment_set.first.start_time }}. 
+            When this page was loaded, Timer had run for {{ timer.duration.total_seconds | hhmmss }}. 
         </p>
+
+        <ul>
+            {% for segment in timer.segment_set.all %}
+            {% if segment.stop_time %}
+            <li>{{ segment.duration.total_seconds | hhmmss }}</li>
+            {% endif %}
+            {% endfor %}
+        </ul>
         {% else %}
         <p>
             <button type="submit" formaction="{% url 'start_timer' %}">Start</button>
