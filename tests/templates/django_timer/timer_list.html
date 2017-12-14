@@ -1,0 +1,50 @@
+{% load timer static %}
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{% static 'django_timer/css/timer.css' %}">
+        <style>
+            main {
+                width: 400px;
+                margin: auto;
+            }
+            a {
+                color: #337ab4;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            .inactive a {
+                color: #555;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <ul class="django-timer django-timer-segments">
+                {% for timer in object_list %}
+                <li {% if timer.stopped %}class="inactive"{% endif %}>
+                    <a href="{% url 'detail' timer.pk %}">
+                        {{ timer.segment_set.first.start_time }} -
+                        {{ timer.duration.total_seconds | hhmmss }}
+                        {% if timer.running %}
+                        (running)
+                        {% elif timer.paused %}
+                        (paused)
+                        {% elif timer.stopped %}
+                        (stopped)
+                        {% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            <form method="POST">
+                {% csrf_token %}
+                <p class="django-timer">
+                    <button formaction="{% url 'start_timer' %}">Starte neuen Timer</button>
+                </p>
+            </form>
+        </main>
+    </body>
+</html>

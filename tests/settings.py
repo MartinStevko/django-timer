@@ -44,3 +44,6 @@ TEMPLATES = [
 STATIC_URL = '/static/'
 
 DEBUG = True
+
+USE_L10N = True 
+LANGUAGE_CODE = 'de'
