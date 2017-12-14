@@ -205,4 +205,16 @@ class TemplateTagsTest(TestCase):
         context = Context({'timer': timer})
         html = template.render(context)
         self.assertIn('id="django-timer"', html)
+
+    def test_hhmmss(self):
+        duration = timedelta(hours=1, minutes=3, seconds=20.1)
+        context = Context({'duration': duration})
+        self.assertEqual(
+            Template('{% load timer %}{{ duration.total_seconds | hhmmss }}').render(context),
+            '1:03:20'
+        )
+        self.assertEqual(
+            Template('{% load timer %}{{ duration | hhmmss }}').render(context),
+            '1:03:20'
+        )
         

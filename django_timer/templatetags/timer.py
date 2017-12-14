@@ -1,4 +1,5 @@
 
+from datetime import timedelta
 from django import template
 
 register = template.Library()
@@ -9,6 +10,8 @@ def render_timer(timer):
 
 @register.filter
 def hhmmss(value):
+    if isinstance(value, timedelta):
+        value = value.total_seconds()
     minutes, seconds = divmod(round(value), 60)
     hours, minutes = divmod(minutes, 60)
     if hours:
