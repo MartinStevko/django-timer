@@ -28,3 +28,31 @@ if (timer) {
         }, 1000)
     }
 }
+
+var buttons = document.querySelectorAll('.django-timer button.ajax')
+buttons.forEach( function(element) {
+    element.addEventListener('click', 
+        function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            submitAction(element)
+        }
+    )
+})
+
+function submitAction(button){
+    var xhttp = new XMLHttpRequest()
+    var url = button.getAttribute('formaction')
+    var csrftoken = document.querySelector('.django-timer [name=csrfmiddlewaretoken]').getAttribute('value')
+    xhttp.open("POST", url, true)
+    xhttp.setRequestHeader("X-CSRFToken", csrftoken)
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4){
+            console.log(this)
+            if (this.status == 200){
+                window.location.reload()
+            }
+        }
+    };
+    xhttp.send()
+}
