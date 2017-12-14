@@ -1,4 +1,4 @@
-{% load timer %}
+{% load timer l10n %}
 <div class="django-timer">
     <form action="" method="POST">
         {% csrf_token %}
@@ -9,7 +9,7 @@
                 <li class="inactive">{{ segment.duration.total_seconds | hhmmss }}</li>
                 {% else %}
                 <li id="django-timer"
-                    value="{{ segment.duration.total_seconds }}"
+                    value="{{ segment.duration.total_seconds | unlocalize }}"
                     {% if timer.running %}class="active"{% endif %} 
                 >
                     {{ segment.duration.total_seconds | hhmmss }}
@@ -18,16 +18,22 @@
             {% endfor %}
         </ul>
     
+        {% if timer.paused %}
+        <p class="django-timer-info">
+            Timer is paused.
+        </p>
+        {% endif %}
+
         <p class="django-timer-main">
             {% if timer.running %}
-            <button type="submit" formaction="{% url 'pause_timer' %}">Pause</button>
+            <button class="ajax" type="submit" formaction="{% url 'pause_timer' %}">Pause</button>
             {% elif timer.paused %}
-            <button type="submit" formaction="{% url 'resume_timer' %}">Resume</button>
+            <button class="ajax" type="submit" formaction="{% url 'resume_timer' %}">Resume</button>
             {% endif %}
             {% if timer.stopped %}
             <button type="submit" formaction="{% url 'start_timer' %}">Start a new timer</button>
             {% else %}
-            <button type="submit" formaction="{% url 'stop_timer' %}">Stop</button>
+            <button class="ajax" type="submit" formaction="{% url 'stop_timer' %}">Stop</button>
             {% endif %}
         </p>
 
