@@ -9,6 +9,9 @@ from django.contrib.auth.models import User
 class TimerException(Exception):
     pass
 
+class TimerStartException(TimerException):
+    pass
+
 class TimerResumeException(TimerException):
     pass
 
@@ -25,7 +28,7 @@ class TimerQuerySet(models.QuerySet):
 
     def start(self, user=None):
         timer = self.create(user=user)
-        timer.segment_set.create()
+        timer.start()
         return timer
 
 class Timer(models.Model):
@@ -37,6 +40,11 @@ class Timer(models.Model):
 
     def duration(self):
         return sum([segment.duration() for segment in self.segment_set.all()], timedelta())
+
+    def start(self):
+        if self.segment_set.count() > 0:
+            raise TimerStartException(_('Timer has already been started.'))
+        self.segment_set.create()
 
     def stop(self):
         self.pause()

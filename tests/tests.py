@@ -9,14 +9,25 @@ from django.template import Template, Context
 from django.http import HttpResponseNotAllowed
 from django.contrib.auth.models import User
 
-from django_timer.models import Timer, Segment, TimerException, TimerResumeException
+from django_timer.models import Timer, Segment, TimerResumeException, TimerStartException
 
 class ModelTest(TestCase):
 
-    def test_create_timer_with_segment(self):
+    def test_start_timer_through_manager(self):
         timer = Timer.objects.start()
         self.assertEqual(timer.segment_set.count(), 1)
         self.assertIsInstance(timer.segment_set.first().start_time, datetime)
+
+    def test_start_timer_through_model(self):
+        timer = Timer.objects.create()
+        self.assertEqual(timer.segment_set.count(), 0)
+        timer.start()
+        self.assertEqual(timer.segment_set.count(), 1)
+        self.assertIsInstance(timer.segment_set.last().start_time, datetime)
+
+        # Starting again raises Error
+        with self.assertRaises(TimerStartException):
+            timer.start()
 
     def test_duration_if_timer_still_running(self):
         timer = Timer.objects.start()
