@@ -2,21 +2,19 @@
     box-sizing: border-box;
 }
 
-/* Main */
+/* Buttons */
 
-.django-timer-main {
+.django-timer-buttons {
     display: flex;
     flex-flow: row nowrap;
     align-items: baseline;
 }
 
-.django-timer-main > * {
+.django-timer-buttons > * {
     margin-right: 6px;
 }
 
-/* Buttons */
-
-.django-timer button {
+.django-timer-buttons button {
     border: unset;
     padding: 6px 12px;
     cursor: pointer;
@@ -25,13 +23,13 @@
     border-radius: 4px;
 }
 
-/* Timer counter */
+#django-timer-stop {
+    background: red;
+}
 
-span#django-timer {
-    padding: 6px 12px;
-    text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+#django-timer-start,
+#django-timer-resume {
+    background: green;
 }
 
 /* Segments */
@@ -43,8 +41,23 @@ span#django-timer {
     padding: 0;
 }
 
+#django-timer-segments-toggler {
+    font-size: smaller;
+    color: #337ab4;
+    cursor: pointer;
+}
+
+#django-timer-segments-toggler:hover {
+    text-decoration: underline
+}
+    
+
 .django-timer-segments .inactive {
     color: #555;
+}
+
+.django-timer-segments .hide {
+    display: none;
 }
 
 .django-timer-segments li {
