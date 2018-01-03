@@ -1,4 +1,6 @@
 
+import json
+
 from datetime import timedelta, datetime
 from time import sleep
 
@@ -140,12 +142,13 @@ class ViewTest(TestCase):
     def test_start_and_stop_timer(self):
         self.client.post(reverse('start_timer'))
         self.assertEqual(Timer.objects.count(), 1)
-        self.client.post(reverse('pause_timer'))
+        timer = Timer.objects.first()
+        self.client.post(reverse('pause_timer', args=(timer.pk,)))
         self.assertIsInstance(Timer.objects.first().segment_set.last().stop_time, datetime)
-        self.client.post(reverse('resume_timer'))
+        self.client.post(reverse('resume_timer', args=(timer.pk,)))
         self.assertEqual(Timer.objects.first().segment_set.count(), 2)
         self.assertIsNone(Timer.objects.first().segment_set.last().stop_time)
-        self.client.post(reverse('stop_timer'))
+        self.client.post(reverse('stop_timer', args=(timer.pk,)))
         self.assertTrue(Timer.objects.first().stopped) 
 
     def test_start_timer_as_user(self):
@@ -155,33 +158,45 @@ class ViewTest(TestCase):
         timer = Timer.objects.first()
         self.assertEqual(timer.user, user)
 
+    def test_timer_view_response(self):
+        # TimerView returns a json response with the timer duration and status
+        response = self.client.post(reverse('start_timer'))
+        content = json.loads(response.content)
+        self.assertEqual(content['status'], 'running')
+        self.sasertEqual(content['duration'], 0)
+        
     def test_method_not_allowed(self):
+
+        timer = Timer.objects.create()
 
         response = self.client.get(reverse('start_timer'))
         self.assertEqual(response.status_code, 405)
 
-        response = self.client.get(reverse('pause_timer'))
+        response = self.client.get(reverse('pause_timer', args=(timer.pk,)))
         self.assertEqual(response.status_code, 405)
 
-        response = self.client.get(reverse('resume_timer'))
+        response = self.client.get(reverse('resume_timer', args=(timer.pk,)))
         self.assertEqual(response.status_code, 405)
 
-        response = self.client.get(reverse('stop_timer'))
+        response = self.client.get(reverse('stop_timer', args=(timer.pk,)))
         self.assertEqual(response.status_code, 405)
 
     def test_pause_and_resume_race_conditions(self):
 
         self.client.post(reverse('start_timer'))
-        self.client.post(reverse('pause_timer'))
 
-        self.client.post(reverse('resume_timer'))
+        timer = Timer.objects.first()
+
+        self.client.post(reverse('pause_timer', args=(timer.pk,)))
+
+        self.client.post(reverse('resume_timer', args=(timer.pk,)))
         # Resuming a second time shouldn't raise
-        self.client.post(reverse('resume_timer'))
+        self.client.post(reverse('resume_timer', args=(timer.pk,)))
 
-        self.client.post(reverse('stop_timer'))
+        self.client.post(reverse('stop_timer', args=(timer.pk,)))
         # Resuming or pausing a stopped timer shouldn't raise
-        self.client.post(reverse('pause_timer'))
-        self.client.post(reverse('resume_timer'))
+        self.client.post(reverse('pause_timer', args=(timer.pk,)))
+        self.client.post(reverse('resume_timer', args=(timer.pk,)))
 
     def test_start_if_timer_running(self):
 
@@ -193,9 +208,12 @@ class ViewTest(TestCase):
     def test_stop_if_no_timer_is_running(self):
 
         self.client.post(reverse('start_timer'))
-        self.client.post(reverse('stop_timer'))
+
+        timer = Timer.objects.first()
+
+        self.client.post(reverse('stop_timer', args=(timer.pk,)))
         # Stopping a second time shouldn't raise
-        self.client.post(reverse('stop_timer'))
+        self.client.post(reverse('stop_timer', args=(timer.pk,)))
 
 class TemplateTagsTest(TestCase):
 
