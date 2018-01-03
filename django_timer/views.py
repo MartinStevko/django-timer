@@ -34,9 +34,6 @@ class TimerView(View):
 
 class Start(TimerView):
 
-    def get_timer(self, pk):
-        return Timer.objects.create(user=self.get_user(self.request))
-
     def action(self, request, pk):
         self.timer.start()
     
