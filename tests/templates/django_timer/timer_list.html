@@ -24,25 +24,19 @@
         <main>
             <ul class="django-timer django-timer-segments">
                 {% for timer in object_list %}
-                <li {% if timer.stopped %}class="inactive"{% endif %}>
+                <li>
                     <a href="{% url 'detail' timer.pk %}">
                         {{ timer.segment_set.first.start_time }} -
                         {{ timer.duration.total_seconds | hhmmss }}
-                        {% if timer.running %}
-                        (running)
-                        {% elif timer.paused %}
-                        (paused)
-                        {% elif timer.stopped %}
-                        (stopped)
-                        {% endif %}
+                        ({{ timer.get_status_display }})
                     </a>
                 </li>
                 {% endfor %}
             </ul>
-            <form method="POST">
+            <form method="POST" action="">
                 {% csrf_token %}
                 <p class="django-timer">
-                    <button formaction="{% url 'start_timer' %}">Starte neuen Timer</button>
+                    <button>Timer hinzufügen</button>
                 </p>
             </form>
         </main>

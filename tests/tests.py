@@ -164,7 +164,7 @@ class ViewTest(TestCase):
 class TemplateTagsTest(TestCase):
 
     def test_render_timer(self):
-        timer = Timer.objects.start()
+        timer = Timer.objects.create()
         template = Template('{% load timer %}{% render_timer timer %}')
         context = Context({'timer': timer})
         html = template.render(context)
