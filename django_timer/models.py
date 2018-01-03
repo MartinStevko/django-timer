@@ -17,15 +17,6 @@ class TimerResumeException(TimerException):
 
 class TimerQuerySet(models.QuerySet):
 
-    def get_or_start(self, user=None):
-        try:
-            return self.get_for_user(user=user)
-        except Timer.DoesNotExist:
-            return self.start(user=user)
-
-    def get_for_user(self, user=None):
-        return self.get(stopped=False, user=user)
-
     def start(self, user=None):
         timer = self.create(user=user)
         timer.start()
@@ -33,7 +24,14 @@ class TimerQuerySet(models.QuerySet):
 
 class Timer(models.Model):
 
+    STATUS = (
+        ('running', _('running')),
+        ('paused', _('paused')),
+        ('stopped', _('stopped')),
+    )
+
     user = models.ForeignKey(to=User, null=True)
+    status = models.CharField(max_length=12, choices=STATUS)
     stopped = models.BooleanField(default=False)
 
     objects = TimerQuerySet.as_manager()
@@ -45,29 +43,27 @@ class Timer(models.Model):
         if self.segment_set.count() > 0:
             raise TimerStartException(_('Timer has already been started.'))
         self.segment_set.create()
+        self.status = 'running'
+        self.save()
 
     def stop(self):
         self.pause()
-        self.stopped = True
+        self.status = 'stopped'
         self.save()
 
     def pause(self):
         self.segment_set.last().stop()
+        self.status = 'paused'
+        self.save()
 
     def resume(self):
-        if self.stopped:
+        if self.status == 'stopped':
             raise TimerResumeException(_('Timer has been stopped and cannot be resumed.'))
         if not self.segment_set.last().stop_time:
             raise TimerResumeException(_('Cannot resume, if timer is still running.'))
         self.segment_set.create()
-
-    @property
-    def running(self):
-        return not self.stopped and not self.paused
-
-    @property
-    def paused(self):
-        return not self.stopped and self.segment_set.last().stop_time
+        self.status = 'running'
+        self.save()
 
 class Segment(models.Model):
 

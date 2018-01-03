@@ -1,17 +1,29 @@
 
 from django.views.generic import View
-from django.shortcuts import redirect
+from django.http import JsonResponse, Http404
 
 from django_timer.models import Timer, TimerResumeException
 
 class TimerView(View):
     
-    def get_success_url(self):
-        return '/'
+    def get_json_response(self):
+        if not hasattr(self, 'timer') or not self.timer:
+            raise Http404
+        return JsonResponse({
+            'status': 'running',
+            'duration': self.timer.duration().total_seconds(),
+            })
+
+    def get_timer(self, pk):
+        try:
+            return Timer.objects.get(pk=pk)
+        except Timer.DoesNotExist:
+            pass
     
     def post(self, request, pk=None):
+        self.timer = self.get_timer(pk)
         self.action(request, pk)
-        return redirect(self.get_success_url())
+        return self.get_json_response()
 
     def get_user(self, request):
         if request.user.is_authenticated:
@@ -22,33 +34,26 @@ class TimerView(View):
 
 class Start(TimerView):
 
+    def get_timer(self, pk):
+        return Timer.objects.create(user=self.get_user(self.request))
+
     def action(self, request, pk):
-        user = self.get_user(request)
-        Timer.objects.get_or_start(user=user)
+        self.timer.start()
     
 class Pause(TimerView):
 
     def action(self, request, pk):
-        user = self.get_user(request)
-        try:
-            Timer.objects.get_for_user(user).pause()
-        except Timer.DoesNotExist:
-            pass
+        self.timer.pause()
             
 class Resume(TimerView):
 
     def action(self, request, pk):
-        user = self.get_user(request)
         try:
-            Timer.objects.get_for_user(user).resume()
-        except (TimerResumeException, Timer.DoesNotExist):
+            self.timer.resume()
+        except TimerResumeException:
             pass
         
 class Stop(TimerView):
 
     def action(self, request, pk):
-        user = self.get_user(request)
-        try:
-            Timer.objects.get_for_user(user).stop()
-        except Timer.DoesNotExist:
-            pass
+        self.timer.stop()

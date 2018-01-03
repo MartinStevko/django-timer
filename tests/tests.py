@@ -84,58 +84,18 @@ class ModelTest(TestCase):
         timer = Timer.objects.start(user=user)
         self.assertEqual(timer.user, user)
 
-    def test_get_or_start(self):
-        t1 = Timer.objects.get_or_start()
-        self.assertEqual(Timer.objects.count(), 1)
-        t2 = Timer.objects.get_or_start()
-        self.assertEqual(Timer.objects.count(), 1)
-        self.assertEqual(t1.pk, t2.pk)
-        t2.stop()
-        t3 = Timer.objects.get_or_start()
-        self.assertEqual(Timer.objects.count(), 2)
-        self.assertNotEqual(t2.pk, t3.pk)
-        user = User.objects.create_user(username='foo', password='bar')
-        t4 = Timer.objects.get_or_start(user=user)
-        self.assertEqual(Timer.objects.count(), 3)
-        
-    def test_get_for_user(self):
-        u1 = User.objects.create_user(username='foo', password='bar')
-        u2 = User.objects.create_user(username='bar', password='foo')
-        t1 = Timer.objects.get_or_start(user=u1)
-        t1.stop()
-        t1a = Timer.objects.get_or_start(user=u1)
-        t2 = Timer.objects.get_or_start(user=u2)
-        t0 = Timer.objects.get_or_start(user=None)
-        self.assertEqual(Timer.objects.count(), 4)
-
-        self.assertEqual(Timer.objects.get_for_user(), t0)
-        self.assertEqual(Timer.objects.get_for_user(user=u1), t1a)
-        self.assertEqual(Timer.objects.get_for_user(user=u2), t2)
-
-        t2.stop()
-        with self.assertRaises(Timer.DoesNotExist):
-            Timer.objects.get_for_user(user=u2)
-
     def test_status_flags(self):
         t = Timer.objects.start()
-        self.assertTrue(t.running)
-        self.assertFalse(t.paused)
-        self.assertFalse(t.stopped)
+        self.assertEqual(t.status, 'running')
 
         t.pause()
-        self.assertFalse(t.running)
-        self.assertTrue(t.paused)
-        self.assertFalse(t.stopped)
+        self.assertEqual(t.status, 'paused')
 
         t.resume()
-        self.assertTrue(t.running)
-        self.assertFalse(t.paused)
-        self.assertFalse(t.stopped)
+        self.assertEqual(t.status, 'running')
 
         t.stop()
-        self.assertFalse(t.running)
-        self.assertFalse(t.paused)
-        self.assertTrue(t.stopped)
+        self.assertEqual(t.status, 'stopped')
 
 class ViewTest(TestCase):
 
@@ -149,7 +109,7 @@ class ViewTest(TestCase):
         self.assertEqual(Timer.objects.first().segment_set.count(), 2)
         self.assertIsNone(Timer.objects.first().segment_set.last().stop_time)
         self.client.post(reverse('stop_timer', args=(timer.pk,)))
-        self.assertTrue(Timer.objects.first().stopped) 
+        self.assertEqual(Timer.objects.first().status, 'stopped')
 
     def test_start_timer_as_user(self):
         user = User.objects.create_user(username='foo', password='bar')
@@ -161,10 +121,11 @@ class ViewTest(TestCase):
     def test_timer_view_response(self):
         # TimerView returns a json response with the timer duration and status
         response = self.client.post(reverse('start_timer'))
+        self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
         self.assertEqual(content['status'], 'running')
-        self.sasertEqual(content['duration'], 0)
-        
+        self.assertEqual(content['duration'], 0)
+
     def test_method_not_allowed(self):
 
         timer = Timer.objects.create()
@@ -199,11 +160,12 @@ class ViewTest(TestCase):
         self.client.post(reverse('resume_timer', args=(timer.pk,)))
 
     def test_start_if_timer_running(self):
+        # Number of timers that can be started is unlimited
 
         self.client.post(reverse('start_timer'))
         self.client.post(reverse('start_timer'))
 
-        self.assertEqual(Timer.objects.count(), 1) 
+        self.assertEqual(Timer.objects.count(), 2) 
 
     def test_stop_if_no_timer_is_running(self):
 
