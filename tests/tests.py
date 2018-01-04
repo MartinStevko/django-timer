@@ -1,5 +1,6 @@
 
 import json
+import xml.etree.ElementTree as ET
 
 from datetime import timedelta, datetime
 from time import sleep
@@ -119,7 +120,7 @@ class ViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
         self.assertEqual(content['status'], 'running')
-        self.assertEqual(content['duration'], 0)
+        self.assertAlmostEqual(content['duration'], 0, delta=0.1)
 
     def test_method_not_allowed(self):
 
@@ -165,10 +166,18 @@ class TemplateTagsTest(TestCase):
 
     def test_render_timer(self):
         timer = Timer.objects.create()
+        timer.start()
         template = Template('{% load timer %}{% render_timer timer %}')
         context = Context({'timer': timer})
         html = template.render(context)
-        self.assertIn('id="django-timer"', html)
+        
+        self.assertIn('class="django-timer"', html)
+        self.assertIn('class="django-timer-display active"', html)
+        self.assertIn('class="django-timer-buttons"', html)
+        
+        root = ET.fromstring(html)
+        display = root.findall(".//*[@class='django-timer-display active']")[0]
+        self.assertAlmostEqual(float(display.attrib['value']), timer.duration().total_seconds(), delta=0.1)
 
     def test_hhmmss(self):
         duration = timedelta(hours=1, minutes=3, seconds=20.1)
