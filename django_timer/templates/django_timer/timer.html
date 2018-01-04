@@ -1,53 +1,22 @@
-{% load timer l10n %}
+{% load timer l10n i18n %}
 <div class="django-timer">
     <form action="" method="POST">
         {% csrf_token %}
-        {% if timer %}
-        <ul class="django-timer-segments">
-            {% for segment in timer.segment_set.all %}
-            {% if forloop.last %}
-            <li id="django-timer-display" value="{{ segment.duration.total_seconds | unlocalize }}"
-            {% if timer.running %}class="active"{% endif %}>
-            {{ segment.duration | hhmmss }}
-        </li>
-        {% else %}
-        <li class="inactive hide">{{ segment.duration.total_seconds | hhmmss }}</li>
-        {% endif %}
-        {% endfor %}
-    </ul>
-    
-    {% if timer.paused %}
-    <p class="django-timer-info">
-        Timer is paused.
-    </p>
-    {% endif %}
-    
-    <p class="django-timer-buttons">
-        {% if timer.running %}
-        <button id="django-timer-pause" class="ajax" type="submit" formaction="{% url 'pause_timer' %}">Pause</button>
-        {% elif timer.paused %}
-        <button id="django-timer-resume" class="ajax" type="submit" formaction="{% url 'resume_timer' %}">Resume</button>
-        {% endif %}
-        {% if timer.stopped %}
-        <button id="django-timer-start" type="submit" formaction="{% url 'start_timer' %}">Start a new timer</button>
-        {% else %}
-        <button id="django-timer-stop" class="ajax" type="submit" formaction="{% url 'stop_timer' %}">Stop</button>
-        {% endif %}
-        <span id="django-timer-segments-toggler">Show all segments</span>
-    </p>
-    
-    <p class="django-timer-info">
-        Timer was started on {{ timer.segment_set.first.start_time }}
-        </p>
-
-        <p class="django-timer-info">
-            When this page was loaded, Timer had run for {{ timer.duration.total_seconds | hhmmss }}. 
-        </p>
-
-        {% else %}
-        <p class="django-timer-buttons">
-            <button id="django-timer-start" type="submit" formaction="{% url 'start_timer' %}">Start a new timer</button>
-        </p>
-        {% endif %}
+        <div class="django-timer-display {% if timer.status == 'running' %}active{% endif %}"
+            value="{{ timer.duration.total_seconds | unlocalize }}"
+            >
+            {{ timer.duration | hhmmss }}
+        </div>
+        <div class="django-timer-buttons">
+            {% if not timer.status %}
+            <button id="django-timer-start" formaction="{% url 'start_timer' timer.pk %}">{% trans 'Start' %}</button>
+            {% elif timer.status == 'running' %}
+            <button id="django-timer-pause" formaction="{% url 'pause_timer' timer.pk %}">{% trans 'Pause' %}</button>
+            <button id="django-timer-stop" formaction="{% url 'stop_timer' timer.pk %}">{% trans 'Stop' %}</button>
+            {% elif timer.status == 'paused' %}
+            <button id="django-timer-resume" formaction="{% url 'resume_timer' timer.pk %}">{% trans 'Weiter' %}</button>
+            <button id="django-timer-stop" formaction="{% url 'stop_timer' timer.pk %}">{% trans 'Stop' %}</button>
+            {% endif %}
+        </div>
     </form>
 </div>
