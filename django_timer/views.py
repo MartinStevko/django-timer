@@ -10,7 +10,7 @@ class TimerView(View):
         if not hasattr(self, 'timer') or not self.timer:
             raise Http404
         return JsonResponse({
-            'status': 'running',
+            'status': self.timer.status,
             'duration': self.timer.duration().total_seconds(),
             })
 
