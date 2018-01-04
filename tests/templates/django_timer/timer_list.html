@@ -1,44 +1,22 @@
 {% load timer static %}
 <!doctype html>
 <html>
-    <head>
-        <link rel="stylesheet" href="{% static 'django_timer/css/timer.css' %}">
-        <style>
-            main {
-                width: 400px;
-                margin: auto;
-            }
-            a {
-                color: #337ab4;
-                text-decoration: none;
-            }
-            a:hover {
-                text-decoration: underline;
-            }
-            .inactive a {
-                color: #555;
-            }
-        </style>
-    </head>
     <body>
         <main>
-            <ul class="django-timer django-timer-segments">
+            <ul>
                 {% for timer in object_list %}
                 <li>
-                    <a href="{% url 'detail' timer.pk %}">
-                        {{ timer.segment_set.first.start_time }} -
-                        {{ timer.duration.total_seconds | hhmmss }}
-                        ({{ timer.get_status_display }})
-                    </a>
+                    {% render_timer timer %}
                 </li>
                 {% endfor %}
             </ul>
             <form method="POST" action="">
                 {% csrf_token %}
-                <p class="django-timer">
-                    <button>Timer hinzufügen</button>
+                <p>
+                    <button type="submit">Timer hinzufügen</button>
                 </p>
             </form>
         </main>
+        <script src="{% static 'django_timer/js/timer.js' %}"></script>
     </body>
 </html>

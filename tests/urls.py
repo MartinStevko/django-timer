@@ -5,10 +5,6 @@ from django.views.generic import DetailView, ListView
 
 from django_timer.models import Timer
 
-class TimerView(DetailView):
-    model = Timer
-    context_object_name = 'timer'
-
 class IndexView(ListView):
     model = Timer
 
@@ -18,6 +14,5 @@ class IndexView(ListView):
 
 urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^(?P<pk>\d+)/$', TimerView.as_view(), name='detail'),
     url(r'', include('django_timer.urls')),
 ]
