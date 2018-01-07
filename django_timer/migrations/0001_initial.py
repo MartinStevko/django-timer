@@ -29,7 +29,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('status', models.CharField(choices=[('running', 'running'), ('paused', 'paused'), ('stopped', 'stopped')], max_length=12)),
-                ('stopped', models.BooleanField(default=False)),
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),

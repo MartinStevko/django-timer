@@ -32,7 +32,6 @@ class Timer(models.Model):
 
     user = models.ForeignKey(to=User, null=True)
     status = models.CharField(max_length=12, choices=STATUS)
-    stopped = models.BooleanField(default=False)
 
     objects = TimerQuerySet.as_manager()
 
