@@ -10,6 +10,8 @@ def render_timer(timer):
 
 @register.filter
 def hhmmss(value):
+    if not value:
+        return '00:00'
     if isinstance(value, timedelta):
         value = value.total_seconds()
     minutes, seconds = divmod(round(value), 60)
