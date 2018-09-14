@@ -30,7 +30,7 @@ class Timer(models.Model):
         ('stopped', _('stopped')),
     )
 
-    user = models.ForeignKey(to=User, null=True)
+    user = models.ForeignKey(User, null=True, on_delete='CASCADE')
     status = models.CharField(max_length=12, choices=STATUS)
 
     objects = TimerQuerySet.as_manager()
@@ -66,7 +66,7 @@ class Timer(models.Model):
 
 class Segment(models.Model):
 
-    timer = models.ForeignKey(to=Timer)
+    timer = models.ForeignKey(Timer, on_delete='CASCADE')
 
     start_time = models.DateTimeField(auto_now_add=True)
     stop_time = models.DateTimeField(null=True)
